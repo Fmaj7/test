@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat App</title>
+    <style>
+        #chat-box {
+            width: 500px;
+            height: 400px;
+            border: 1px solid #000;
+            overflow-y: scroll;
+            padding: 10px;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>Chat App</h1>
+    <div id="chat-box"></div>
+    <input type="text" id="username" placeholder="Enter your username">
+    <input type="text" id="message" placeholder="Enter your message">
+    <button id="send-btn">Send</button>
+
+    <script>
+        var websocket;
+        var chatBox = $('#chat-box');
+
+        $('#username').on('change', function() {
+            var username = $('#username').val();
+            websocket = new WebSocket('ws://localhost:8080/ws/' + username);
+
+            websocket.onmessage = function(event) {
+                var message = $('<div>').text(event.data);
+                chatBox.append(message);
+                chatBox.scrollTop(chatBox.prop('scrollHeight'));
+            };
+
+            websocket.onclose = function() {
+                var message = $('<div>').text('You have been disconnected.');
+                chatBox.append(message);
+                chatBox.scrollTop(chatBox.prop('scrollHeight'));
+            };
+        });
+
+        $('#send-btn').on('click', function() {
+            var message = $('#message').val();
+            websocket.send(message);
+            $('#message').val('');
+        });
+    </script>
+</body>
+</html>
